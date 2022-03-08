@@ -204,37 +204,6 @@ def _kmedoids_run(data, X, n_clusters, dist_func, dist_func_2, diarkeia, gegonot
 
 
 
-def TSNE_plot(data):
-    #Scatter plot 
-    model = TSNE(n_components=2, random_state=0) 
-    data_array = data.drop(columns=['labels']) 
-    X_embedded = model.fit_transform(data_array.values)
-    
-    # Plot
-    plt.figure()
-    plt.scatter(X_embedded[:,0], X_embedded[:,1], c = data['labels'])
-    plt.title('TSNE plot')
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.show()
-
-
-def PCA_plot(data):
-    
-    #PCA
-    pca = PCA(n_components = 2) # Choose number of components
-    X_embedded = pca.fit_transform(data.values)
-    
-    # Plot
-    plt.figure()
-    plt.scatter(X_embedded[:,0], X_embedded[:,1], c = data['labels'])
-    plt.title('PCA plot')
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.show()
-
-
-
 class KMedoids_version_6(object):
     '''
     Main API of KMedoids Clustering
