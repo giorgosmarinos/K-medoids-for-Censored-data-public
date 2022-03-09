@@ -209,23 +209,11 @@ class KMedoids_version_6(object):
         self.gegonota = gegonota
         self.min_n_obs = min_n_obs
 
-    def fit(self, data,X,diarkeia, gegonota, plotit=True, verbose=True):
+    def fit(self, data,X,diarkeia, gegonota, verbose=True):
         centers,members, costs,tot_cost, dist_mat = _kmedoids_run(data,
                 X,self.n_clusters, self.dist_func, self.dist_func_2, self.diarkeia, self.gegonota, min_n_obs = self.min_n_obs, max_iter=self.max_iter, tol=self.tol,verbose=verbose)        
         print(centers)
         print(members)        
-        if plotit:
-            data['labels'] = members
-            fig, ax = plt.subplots(1,1)
-            colors = ['b','g','r','c','m','y','k']
-            if self.n_clusters > len(colors):
-                raise ValueError('we need more colors')            
-            for i in range(len(centers)):
-                X_c = data.values[members==i,:]
-                plt.figure()
-                ax.scatter(X_c[:,0],X_c[:,1],c=colors[i],alpha=0.5,s=30)
-                ax.scatter(X[centers[i],0],X[centers[i],1],c=colors[i],alpha=1., s=250,marker='*')
-                plt.show()
                     
         if self.n_clusters == 3:            
             data['labels'] = members            

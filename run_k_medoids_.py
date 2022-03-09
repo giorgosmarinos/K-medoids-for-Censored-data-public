@@ -113,7 +113,7 @@ if __name__ == '__main__':
     model = KMedoids_version_6(data,n_clusters=2, diarkeia='time', gegonota='death', dist_func=Jensen_Shanon_distance, dist_func_2=std_euclidean, min_n_obs=180)
 
     # apply KMedoids algorithm from Modified version 5
-    model.fit(data,survival_probabilities_Cox_PH.values.T, diarkeia='time', gegonota='death', plotit=True, verbose=True)
+    model.fit(data,survival_probabilities_Cox_PH.values.T, diarkeia='time', gegonota='death', verbose=True)
     
     
     
