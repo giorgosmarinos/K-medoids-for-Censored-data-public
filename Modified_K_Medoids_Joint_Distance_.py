@@ -22,7 +22,7 @@ from lifelines.statistics import multivariate_logrank_test
 from sklearn.preprocessing import normalize, scale, MinMaxScaler
 
 
-
+# Get the initial centers
 def _get_init_centers(n_clusters, n_samples):
     '''return random points as initial centers'''
     init_ids = []
@@ -33,34 +33,26 @@ def _get_init_centers(n_clusters, n_samples):
     return init_ids
 
 
-#Jensen Shanon distance
+# Jensen Shanon distance
 def _get_distance(data1, data2):
     dist = jensenshannon(data1, data2)
     return dist
 
-
-def example_distance_func(data1, data2):
-    '''example distance function'''
-    return np.sqrt(np.sum((data1 - data2)**2))
-
-
+# Euclidean Distance (used from scikit learn)
 def euclidean_distance(data1, data2):
     return euclidean(data1, data2)
 
 
-def normalization(distance_matrix):
-    
+# Normalization function which is used to scale the first distance metric 
+def normalization(distance_matrix):    
     if type(distance_matrix) != 'numpy.ndarray':
-        distance_matrix = np.array(distance_matrix)
-    
+        distance_matrix = np.array(distance_matrix)    
     scaler = MinMaxScaler()
     scaler.fit(distance_matrix.reshape(-1,1))
-    scaler.transform(distance_matrix.reshape(-1,1))
-    
+    scaler.transform(distance_matrix.reshape(-1,1))    
     return distance_matrix
     
     
-
 #compute the cost for example distance 
 def _get_cost(n_clusters, data, X, centers_id, dist_func, dist_func_2, diarkeia, gegonota, min_n_obs):
     '''return total cost and cost of each cluster'''
@@ -98,42 +90,30 @@ def _get_cost(n_clusters, data, X, centers_id, dist_func, dist_func_2, diarkeia,
                 log_rank_sc = results.p_value                                
             elif n_clusters == 2:                
                 group_1 = data[data['labels'] == 1.0]
-                group_2 = data[data['labels'] == 0.0]
-            
+                group_2 = data[data['labels'] == 0.0]            
                 kmf1 = KaplanMeierFitter() 
-                kmf1.fit(group_1[diarkeia], group_1[gegonota])
-                
+                kmf1.fit(group_1[diarkeia], group_1[gegonota])                
                 kmf2 = KaplanMeierFitter() 
-                kmf2.fit(group_2[diarkeia], group_2[gegonota])
-                
-                results = logrank_test(group_1[diarkeia], group_2[diarkeia], event_observed_A=group_1[gegonota], event_observed_B=group_2[gegonota])
-                
-                log_rank_sc = results.p_value
-            
-        
-    elif len(np.unique(members)) < n_clusters:
-        
+                kmf2.fit(group_2[diarkeia], group_2[gegonota])                
+                results = logrank_test(group_1[diarkeia], group_2[diarkeia], event_observed_A=group_1[gegonota], event_observed_B=group_2[gegonota])                
+                log_rank_sc = results.p_value                    
+    elif len(np.unique(members)) < n_clusters:        
         log_rank_sc = 2
-    
-                
+                    
     return members, costs, np.sum(costs), dist_mat_sumed, log_rank_sc
 
 
-
+# Cox Proportional Hazard Fitter
 def run_Cox_PH_model(data,train_samples):
-    '''Run a Cox PH model''' 
-    
+    '''Run a Cox PH model'''     
     cph = CoxPHFitter(penalizer=0.1, l1_ratio=1.0) # sparse solutions,
-    cph.fit(data[:train_samples], 'week', 'arrest')
-    
+    cph.fit(data[:train_samples], 'week', 'arrest')    
     return cph
     
 
 def _kmedoids_run(data, X, n_clusters, dist_func, dist_func_2, diarkeia, gegonota, min_n_obs, max_iter=10, tol=0.0001, verbose=True):
-    '''run algorithm return centers, members, and etc.'''
-    
-    st = time.time()
-    
+    '''run algorithm return centers, members, and etc.'''    
+    st = time.time()    
     # Get initial centers
     n_samples, n_features = X.shape
     init_ids = _get_init_centers(n_clusters,n_samples)
@@ -145,8 +125,7 @@ def _kmedoids_run(data, X, n_clusters, dist_func, dist_func_2, diarkeia, gegonot
     print('1_tot_cost:',tot_cost)
     print('log_rank_score:', log_rank_score)
     print(Counter(members).values())
-    #break_out_flag = False
-        
+    #break_out_flag = False        
     cc,SWAPED = 0, True
     while True:
         SWAPED = False
@@ -155,10 +134,8 @@ def _kmedoids_run(data, X, n_clusters, dist_func, dist_func_2, diarkeia, gegonot
                 for j in range(len(centers)):
                     centers_ = deepcopy(centers)
                     centers_[j] = i          
-                    members_, costs_, tot_cost_, dist_mat_, log_rank_score_= _get_cost(n_clusters, data, X, centers_,dist_func, dist_func_2, diarkeia, gegonota, min_n_obs)
-                
-                    if tot_cost_ < tot_cost and log_rank_score_ != 2 and log_rank_score_ < 0.01:#  and tot_cost_ < tot_cost:
-                        
+                    members_, costs_, tot_cost_, dist_mat_, log_rank_score_= _get_cost(n_clusters, data, X, centers_,dist_func, dist_func_2, diarkeia, gegonota, min_n_obs)                
+                    if tot_cost_ < tot_cost and log_rank_score_ != 2 and log_rank_score_ < 0.01:                        
                         print('log_rank_score_:', log_rank_score_)
                         print('this is where new variables come in')
                         members, costs, tot_cost, dist_mat,log_rank_score= \
@@ -166,32 +143,24 @@ def _kmedoids_run(data, X, n_clusters, dist_func, dist_func_2, diarkeia, gegonot
                         centers = centers_
                         SWAPED = True
                         if verbose: 
-                            print ('Change centers to ', centers)
-                               
-                        
+                            print ('Change centers to ', centers)                                                       
         print('cc:',cc)
         if cc > max_iter:
             if verbose:
                 print ('End Searching by reaching maximum iteration', max_iter)
             break
-        if not SWAPED:
-            
-            if any(j < min_n_obs for j in Counter(members).values()):
-                
+        if not SWAPED:            
+            if any(j < min_n_obs for j in Counter(members).values()):                
                 # Get initial centers AGAIN
                 n_samples, n_features = X.shape
-                init_ids = _get_init_centers(n_clusters,n_samples)
-                
+                init_ids = _get_init_centers(n_clusters,n_samples)                
                 if verbose:
-                    print ('Initial centers are ', init_ids)
-                    
+                    print ('Initial centers are ', init_ids)                    
                 centers = init_ids
-                members, costs, tot_cost, dist_mat, log_rank_score = _get_cost(n_clusters, data, X, init_ids,dist_func, dist_func_2, diarkeia, gegonota, min_n_obs)
-                    
+                members, costs, tot_cost, dist_mat, log_rank_score = _get_cost(n_clusters, data, X, init_ids,dist_func, dist_func_2, diarkeia, gegonota, min_n_obs)                    
                 continue
             
-            elif all(j >= min_n_obs for j in Counter(members).values()):
-                
+            elif all(j >= min_n_obs for j in Counter(members).values()):                
                 if verbose:
                     print ('End Searching by no swaps')
                     break
@@ -242,18 +211,15 @@ class KMedoids_version_6(object):
 
     def fit(self, data,X,diarkeia, gegonota, plotit=True, verbose=True):
         centers,members, costs,tot_cost, dist_mat = _kmedoids_run(data,
-                X,self.n_clusters, self.dist_func, self.dist_func_2, self.diarkeia, self.gegonota, min_n_obs = self.min_n_obs, max_iter=self.max_iter, tol=self.tol,verbose=verbose)
-        
+                X,self.n_clusters, self.dist_func, self.dist_func_2, self.diarkeia, self.gegonota, min_n_obs = self.min_n_obs, max_iter=self.max_iter, tol=self.tol,verbose=verbose)        
         print(centers)
-        print(members)
-        
+        print(members)        
         if plotit:
             data['labels'] = members
             fig, ax = plt.subplots(1,1)
             colors = ['b','g','r','c','m','y','k']
             if self.n_clusters > len(colors):
-                raise ValueError('we need more colors')
-            
+                raise ValueError('we need more colors')            
             for i in range(len(centers)):
                 X_c = data.values[members==i,:]
                 plt.figure()
@@ -261,46 +227,32 @@ class KMedoids_version_6(object):
                 ax.scatter(X[centers[i],0],X[centers[i],1],c=colors[i],alpha=1., s=250,marker='*')
                 plt.show()
                     
-        if self.n_clusters == 3:
-            
-            data['labels'] = members
-            
+        if self.n_clusters == 3:            
+            data['labels'] = members            
             group_1 = data[data['labels'] == 0.0]
             print(group_1)
             group_2 = data[data['labels'] == 1.0]
             print(group_2)
             group_3 = data[data['labels'] == 2.0]
-            print(group_3)
-    
+            print(group_3)    
             kmf1 = KaplanMeierFitter() 
-            kmf1.fit(group_1[self.diarkeia], group_1[self.gegonota])
-            
+            kmf1.fit(group_1[self.diarkeia], group_1[self.gegonota])            
             kmf2 = KaplanMeierFitter() 
-            kmf2.fit(group_2[self.diarkeia], group_2[self.gegonota])
-            
+            kmf2.fit(group_2[self.diarkeia], group_2[self.gegonota])            
             kmf3 = KaplanMeierFitter() 
-            kmf3.fit(group_3[self.diarkeia], group_3[self.gegonota])
-            
+            kmf3.fit(group_3[self.diarkeia], group_3[self.gegonota])            
             ax = kmf1.plot()
             ax = kmf2.plot(ax = ax)
-            ax = kmf3.plot(ax = ax)
-            
-            #ax.set_ylim([0.0, 1.0])
-    
-            
+            ax = kmf3.plot(ax = ax)            
+            #ax.set_ylim([0.0, 1.0])                
             print(group_1.shape)
             print(group_2.shape)
             print(group_3.shape)
-            
-            
-            #results = multivariate_logrank_test(group_1[self.diarkeia], group_2[self.diarkeia], event_observed_A=group_1[self.gegonota], event_observed_B=group_2[self.gegonota])
-            
-            results = multivariate_logrank_test(data[diarkeia], data['labels'], data[gegonota])
-            
+            #results = multivariate_logrank_test(group_1[self.diarkeia], group_2[self.diarkeia], event_observed_A=group_1[self.gegonota], event_observed_B=group_2[self.gegonota])            
+            results = multivariate_logrank_test(data[diarkeia], data['labels'], data[gegonota])            
             results.print_summary()
             print(results.p_value)        
-            print(results.test_statistic) 
-                        
+            print(results.test_statistic)                         
             #print(data)
             
             #TSNE
@@ -311,38 +263,24 @@ class KMedoids_version_6(object):
             
         elif self.n_clusters == 2:
             
-            data['labels'] = members
-            
+            data['labels'] = members            
             group_1 = data[data['labels'] == 0.0]
             print(group_1)
             group_2 = data[data['labels'] == 1.0]
-            print(group_2)
-
-    
+            print(group_2)    
             kmf1 = KaplanMeierFitter() 
-            kmf1.fit(group_1[self.diarkeia], group_1[self.gegonota])
-            
+            kmf1.fit(group_1[self.diarkeia], group_1[self.gegonota])            
             kmf2 = KaplanMeierFitter() 
-            kmf2.fit(group_2[self.diarkeia], group_2[self.gegonota])
-            
-                        
+            kmf2.fit(group_2[self.diarkeia], group_2[self.gegonota])                       
             ax = kmf1.plot()
-            ax = kmf2.plot(ax = ax)
-            
-            #ax.set_ylim([0.0, 1.0])
-    
-            
+            ax = kmf2.plot(ax = ax)            
+            #ax.set_ylim([0.0, 1.0])           
             print(group_1.shape)
-            print(group_2.shape)
-            
-            
-            results = logrank_test(group_1[self.diarkeia], group_2[self.diarkeia], event_observed_A=group_1[self.gegonota], event_observed_B=group_2[self.gegonota])
-            
-            
+            print(group_2.shape)            
+            results = logrank_test(group_1[self.diarkeia], group_2[self.diarkeia], event_observed_A=group_1[self.gegonota], event_observed_B=group_2[self.gegonota])           
             results.print_summary()
             print(results.p_value)        
-            print(results.test_statistic) 
-                        
+            print(results.test_statistic)                         
             #print(data)
             
             #TSNE

@@ -113,7 +113,7 @@ def load_support2_data():
 
     #data = data.drop(columns=['adlp', 'urine', 'glucose', 'bun', 'totmcst', 'alb', 'income', 'adls', 'bili', 'pafi', 'ph', 'prg2m', 'edu', 'prg6m', 'sfdm2' ])
 
-    #Oι εγγραφες που φευγουν απο τα δεδομένα είναι πάρα πολλές
+    # need to check how many data remain after 
     data = data.dropna()
 
     print(data.isnull().sum())

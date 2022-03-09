@@ -20,7 +20,7 @@ from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bo
 
 
 #####
-from fitness_methods.distances import Jensen_Shanon_distance,  example_distance_func, wasserstein_distance_, log_rank_dist_func, euclidean_distance
+from Modified_fitness_methods.distances import Jensen_Shanon_distance,  example_distance_func, wasserstein_distance_, log_rank_dist_func, norm_euclidean, std_euclidean, cosine_dist, euclidean_distance
 from datasets import load_rossi_data, load_regression_dataset_lifelines, load_transplant_data, load_FLchain_data, load_support2_data, load_friendster_data
 from plots import TSNE_plot, PCA_plot
 from CoxPH_model import run_Cox_PH_model
@@ -49,12 +49,14 @@ if __name__ == '__main__':
     print('####################################################################')
 
     #LOAD ROSSI DATASET
-    survival_probabilities_Cox_PH, data = load_rossi_data()
+    #survival_probabilities_Cox_PH, data = load_rossi_data()
 
     print('####################################################################')
 
     #LOAD Transplant Dataset
-    #survival_probabilities_Cox_PH, data = load_transplant_data()
+    survival_probabilities_Cox_PH, data = load_transplant_data()
+
+    print(data)
 
     print('####################################################################')
 
@@ -108,10 +110,10 @@ if __name__ == '__main__':
     #model.fit(data,survival_probabilities_Cox_PH.values.T, diarkeia='futime', gegonota='death', plotit=True, verbose=True)
     
     #K Medoids 5th version for k = 3 BUT with JOINT distance function 
-    model = KMedoids_version_6(data,n_clusters=2, diarkeia='week', gegonota='arrest', dist_func=Jensen_Shanon_distance, dist_func_2=example_distance_func, min_n_obs=180)
+    model = KMedoids_version_6(data,n_clusters=2, diarkeia='time', gegonota='death', dist_func=Jensen_Shanon_distance, dist_func_2=std_euclidean, min_n_obs=180)
 
     # apply KMedoids algorithm from Modified version 5
-    model.fit(data,survival_probabilities_Cox_PH.values.T, diarkeia='week', gegonota='arrest', plotit=True, verbose=True)
+    model.fit(data,survival_probabilities_Cox_PH.values.T, diarkeia='time', gegonota='death', plotit=True, verbose=True)
     
     
     

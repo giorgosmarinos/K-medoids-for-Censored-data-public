@@ -12,13 +12,12 @@ try:
 except ImportError:
     from sklearn.datasets import make_blobs
 from sklearn.cluster import KMeans
-
-
 from lifelines.datasets import load_rossi
 from lifelines import CoxPHFitter 
-
 from distances import Jensen_Shanon_distance, example_distance_func
 
+
+# Cox Proportional Hazard Model 
 def run_Cox_PH_model(data, time_column, death_column):
     '''Run a Cox PH model'''
 
@@ -32,10 +31,11 @@ def run_Cox_PH_model(data, time_column, death_column):
     return survival_probabilities_Cox_PH
 
 
+# Use this for custom clustering model 
 def special_clustering_func(X, k):
     """
-    Special clustering function which uses the MeanShift
-    model from sklearn.
+    Special clustering function that is used for the definition 
+    alternative clustering method
     
     These user defined functions *must* take the X and a k 
     and can take an arbitrary number of other kwargs, which can
