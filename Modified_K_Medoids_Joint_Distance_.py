@@ -69,7 +69,7 @@ def _get_cost(n_clusters, data, X, centers_id, dist_func, dist_func_2, diarkeia,
                 dist_mat_2[i,j] = 0.
             else:
                 dist_mat[i,j] = dist_func(X[i,:], center)
-                dist_mat_2[i,j] = dist_func_2(data.values[i,:], center_2)
+                dist_mat_2[i,j] = dist_func_2(data.values[i,:].reshape(1, -1), center_2.reshape(1, -1))
     #print( 'time: ', -st+time.time())
     dist_mat_2 = normalize(dist_mat_2)    
     dist_mat_sumed = np.add(dist_mat, dist_mat_2)    
